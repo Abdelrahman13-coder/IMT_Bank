@@ -33,5 +33,8 @@ This project consist of 2 main features
 # Admin Window
 To Enter this Window, Admin must use correct Username and Password.
 In this window Admin can perform the following action
+
 ![image](https://user-images.githubusercontent.com/58150666/167312153-dda24a45-557f-4d76-abda-2e1c13fefed3.png)
 
+From the previous illustration, you can figure out that the admin window
+consists of 3 main features:
