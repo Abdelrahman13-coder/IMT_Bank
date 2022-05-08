@@ -13,15 +13,15 @@
 #include <windows.h>
 
 
+
 typedef struct bank_account{
-    char full_name[40];
-    char address[40];
+    char *full_name;
+    char *address;
     char national_id[15];  //national id must consist of 14 digit numbers
     int age;
     char bank_acc_id[11];
-    char guardian[40];
     char guardian_nat_id[15];   // guardian national id must consist of 14 digits numbers
-    char status[11];
+    char *status;
     float balance;
     char *password;  //Random Password will be generated for each account during creation of it
 }Bank_Account;
@@ -38,7 +38,7 @@ void displayMainMenu();
 void displayAdminMainMenu();
 void displayClientMainMenu();
 char* randomPasswordGeneration(int N);
-void createNewAccount();
+Bank_Account createNewAccount();
 
 
 
@@ -50,10 +50,10 @@ void createNewAccount();
 int main()
 {
     int window_choice, admin_choice, client_choice, choice;
-    Bank_Account acc;
     char filename[15] , bank_account_id[11], national_id[15];
     float amount;
     FILE *fp, *fptr;
+    Bank_Account acc;
 
     home:
         system("cls");
@@ -80,15 +80,22 @@ int main()
 
                 switch(admin_choice){
                 case 1:
-
-                    createNewAccount();
-                    printf("Press any key to return to the main menu...");
+                    acc = createNewAccount();
+                    // create filename based on national id just for now
+                    stpcpy(filename, acc.national_id);  // todo change to bank account id
+                    printf("\n\n%s", filename);
+                    fp = fopen(strcat(filename, ".dat"), "w");
+                    printf("\nOpened");
+                    fwrite(&acc, sizeof(acc), 1, fp);
+                    if(fwrite != 0){
+                        printf("Registered Succesfully\n");
+                    }
+                    printf("\nPress any key to return to the main menu...");
                     getch();
                     goto main_menu;
                     break;
 
                 case 2:
-                    system("cls");
                     printf("Press any key to return to the main menu...");
                     getch();
                     goto main_menu;
@@ -143,7 +150,7 @@ int main()
 int main_func()
 {
     int option,choice;
-    struct bank_account acc;
+    Bank_Account acc;
     char filename[15] , bank_account_id[11], national_id[15];
     float amount;
     FILE *fp, *fptr;
@@ -306,44 +313,50 @@ char* randomPasswordGeneration(int N)
 }
 
 
-void createNewAccount()
+Bank_Account createNewAccount()
 {
-//    gotoxy(2, 3);
-//    printf("Creating New Account:");
-//    gotoxy(2, 4);
-//    printf("-----------=---------");
-//
-//    printf("\nEnter your full name ");
-//    scanf("%s",acc.full_name);
-//    fflush(stdin);
-//    printf("\nEnter your full Address ");
-//    scanf("%s",acc.address);
-//
-//    fflush(stdin);   // clear standard input
-//    printf("\nEnter your age ");
-//    scanf("%d",&acc.age);
-//
-//    printf("\nEnter your National ID\n");
-//    scanf("%s",acc.national_id);
-//
-//    if (acc.age < 21){
-//        fflush(stdin);   //clear standard input
-//        printf("\nEnter your Guardian National ID ");
-//        scanf("%s",acc.guardian_nat_id);
-//    }
-//    printf("\nEnter your Balance ");
-//    scanf("%f",&acc.balance);
-//
-//    acc.password = randomPasswordGeneration(6);
-//    printf("Bank account Id created randomly\n");
-//    printf("Password created randomly: %s\n", acc.password);
-//
-//    stpcpy(acc.status,"Active");
-//    // create filename based on national id just for now
-//    stpcpy(filename, acc.national_id);  // todo change to bank account id
-//    fp=fopen(strcat(filename,".dat"),"w");
-//    fwrite(&acc,sizeof(acc),1,fp);
-//        if(fwrite != 0){
-//            printf("Registered Succesfully\n");
-//        }
+    Bank_Account acc;
+
+    printf("\n Creating New Account:");
+    printf("\n ---------------------");
+
+    fflush(stdin);
+    printf("\n    Full Name: ");
+    gets(acc.full_name);
+    printf("%s", acc.full_name);
+
+    fflush(stdin);
+    printf("\n    Full Address: ");
+    gets(acc.address);
+    printf("%s", acc.address);
+
+    printf("\n    Age: ");
+    scanf("%d", &acc.age);
+    printf("%d", acc.age);
+
+    printf("\n    National ID: ");
+    scanf("%s", acc.national_id);
+    printf("%s", acc.national_id);
+
+    if (acc.age < 21){
+        fflush(stdin);
+        printf("\n    Guardian National ID: ");
+        scanf("%s", acc.guardian_nat_id);
+        printf("%s", acc.guardian_nat_id);
+    }
+
+    printf("\n    Balance: ");
+    scanf("%f", &acc.balance);
+    printf("%f", acc.balance);
+
+    acc.status = "Active";
+
+    printf("\n\n Your automatically generated Bank Account Credentials:");
+
+    printf("\n    Bank Account ID: ");
+
+    acc.password = randomPasswordGeneration(8);
+    printf("\n    Password: %s", acc.password);
+
+    return acc;
 }
