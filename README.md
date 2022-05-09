@@ -2,8 +2,9 @@
 Your mission is to implement IMT Bank System according to the following
 requirments. To Pass this Project a group of test cases must be passed.
 This project consist of 2 main features
-1- Admin Window.
-2- Client Window.
+
+1. **Admin Window.**
+2. **Client Window.**
 
 **Bank Account** Bank Account must include those information
 * **Full Name**
