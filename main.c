@@ -21,11 +21,11 @@ typedef struct bank_account{
     char *address;
     char national_id[15];       //national id must consist of 14 digit numbers
     int age;
-    char bank_acc_id[11];
+    int bank_acc_id;
     char guardian_nat_id[15];   // guardian national id must consist of 14 digits numbers
     char status[11];
     float balance;
-    char *password;             //Random Password will be generated for each account during creation of it
+    char password[9];             //Random Password will be generated for each account during creation of it
 }Bank_Account;
 
 
@@ -41,7 +41,7 @@ void displayAdminMainMenu();
 void displayClientMainMenu();
 //int getLatestBankID();
 //void saveLatestBankID(int id);
-char* bankIDGenerator();
+int bankIDGenerator();
 char* randomPasswordGenerator(int N);
 int no_of_spaces(char *name);
 int isNumber(char s[]);
@@ -275,39 +275,20 @@ void displayClientMainMenu()
 /**********************************************************/
 
 
-char* bankIDGenerator(){
-    char initial_bankID[11];
-    int bankID;
-    char snum[11];
-    char *last_line;
+int bankIDGenerator(){
+    int ID = 1000000000;
     FILE *fptr;
-    char filename[15];
-    *filename = "bank_ids";
-    *initial_bankID = "1000000000";
-    fptr=fopen(strcat(filename,".dat"),"w");
-    fwrite(&initial_bankID,sizeof(initial_bankID),1,fptr);
+    fptr = fopen("Bank_ID.txt", "r");
 
-    static const long max_len = 55+ 1;  // define the max length of the line to read
-    char buff[max_len + 1];             // define the buffer and allocate the length
+    if(fptr != NULL)
+        ID = getw(fptr) + 1;
+    fclose(fptr);
 
-    if ((fptr = fopen(filename, "rb")) != NULL)  {      // open fptr. I omit error checks
+    fptr = fopen("Bank_ID.txt", "w");
+    putw(ID, fptr);
+    fclose(fptr);
 
-        fseek(fptr, -max_len, SEEK_END);            // set pointer to the end of fptr minus the length you need. Presumably there can be more than one new line caracter
-        fread(buff, max_len-1, 1, fptr);            // read the contents of the fptr starting from where fseek() positioned us
-        fclose(fptr);                               // close the fptr
-
-        buff[max_len-1] = '\0';                   // close the string
-        char *last_newline = strrchr(buff, '\n'); // find last occurrence of newlinw
-        *last_line = last_newline+1;
-    }
-    if (last_line != initial_bankID){
-        bankID = atoi(last_line) + 1;
- //       itoa(bankID, snum, 22);
-        *snum = atoa(bankID);
-        fptr=fopen(strcat(filename,".dat"),"w");
-        fwrite(&snum,sizeof(snum),1,fptr);
-    }
-    return last_line;
+    return ID;
 }
 
 
@@ -383,7 +364,6 @@ Bank_Account createNewAccount()
     fflush(stdin);
     printf("\n\n    Full Address: ");
     gets(acc.address);
-//    printf("%s", acc.address);
 
     /*Age*/
     printf("\n\n    Age: ");
@@ -399,11 +379,12 @@ Bank_Account createNewAccount()
         printf("\n\33[2K    National ID: ");
         scanf("%s", acc.national_id);
     } while((strlen(acc.national_id) != 14) || (!isNumber(acc.national_id)));
-    printf("\n\n");
+
 
     /*Guardian National ID*/
     stpcpy(acc.guardian_nat_id, "0");
     if (acc.age < 21){
+        printf("\n\n");
         do {
             if(strlen(acc.guardian_nat_id) > 1)
                 printf("\x1b[A\x1b[A    *National ID must consist of 14-digit Number\n");
@@ -419,10 +400,10 @@ Bank_Account createNewAccount()
 
     printf("\n\n Your automatically generated Bank Account Credentials:");
 
-    stpcpy(acc.bank_acc_id, bankIDGenerator());
-    printf("\n    Bank Account ID: %s", acc.bank_acc_id);
+    acc.bank_acc_id = bankIDGenerator();
+    printf("\n    Bank Account ID: %d", acc.bank_acc_id);
 
-    acc.password = randomPasswordGenerator(8);
+    stpcpy(acc.password, randomPasswordGenerator(8));
     printf("\n    Password: %s", acc.password);
 
     /*Account Status*/
@@ -436,8 +417,7 @@ void saveAccount(Bank_Account acc)
 {
     char filename[11];
     FILE *fptr;
-
-    stpcpy(filename, acc.bank_acc_id);
+    sprintf(filename, "%d", acc.bank_acc_id);
     fptr = fopen(strcat(filename, ".dat"), "w");
     fwrite(&acc, sizeof(acc), 1, fptr);
     if(fwrite != 0){
@@ -449,13 +429,13 @@ void saveAccount(Bank_Account acc)
 Bank_Account openExistingAccount()
 {
     Bank_Account acc;
-    char bank_account_id[11];
+    int bank_account_id;
     FILE *fptr;
 
     printf("\n Enter Bank Account ID: ");
-    scanf("%s", bank_account_id);
+    scanf("%d", bank_account_id);
 
-    fptr = fopen(strcat(bank_account_id,".dat"), "r");
+    fptr = fopen(strcat(sprintf("%d", bank_account_id),".dat"), "r");
     if(fptr == NULL)
         printf("\n Account not registered!");
     else
